@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#b8860b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Mailen &amp; Javier - Wedding Photo Booth</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- SCREEN 1: Welcome -->
+  <div id="screen-welcome" class="screen active">
+    <div class="welcome-bg"></div>
+    <div class="welcome-content">
+      <div class="rings-icon">💍</div>
+      <h1 class="title">Mailen &amp; Javier</h1>
+      <h2 class="subtitle">Wedding Photo Booth</h2>
+      <p class="tagline">Escanea el QR y comparte tu momento 📸</p>
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btn-take-photo">
+          <span class="btn-icon">📷</span> Tomar Foto
+        </button>
+        <button class="btn btn-secondary" id="btn-upload-photo">
+          <span class="btn-icon">🖼️</span> Subir Foto
+        </button>
+      </div>
+      <input type="file" id="file-input" accept="image/*" style="display:none" />
+    </div>
+  </div>
+
+  <!-- SCREEN 2: Camera -->
+  <div id="screen-camera" class="screen">
+    <div class="screen-header">
+      <button class="btn-back" id="btn-back-camera">&#8592; Volver</button>
+      <h3>Tomar Foto</h3>
+    </div>
+    <div class="camera-container">
+      <video id="video-preview" autoplay playsinline muted></video>
+      <div class="camera-overlay"></div>
+    </div>
+    <div class="camera-controls">
+      <button class="btn-flip" id="btn-flip-camera">&#8645; Voltear</button>
+      <button class="btn-shutter" id="btn-shutter"></button>
+      <div style="width:60px"></div>
+    </div>
+    <canvas id="canvas-capture" style="display:none"></canvas>
+  </div>
+
+  <!-- SCREEN 3: Edit / Customize -->
+  <div id="screen-edit" class="screen">
+    <div class="screen-header">
+      <button class="btn-back" id="btn-back-edit">&#8592; Volver</button>
+      <h3>Personalizar Foto</h3>
+    </div>
+
+    <div class="preview-area">
+      <canvas id="canvas-final"></canvas>
+    </div>
+
+    <!-- Background selector -->
+    <div class="section-label">Fondo</div>
+    <div class="options-row" id="bg-options">
+      <div class="option-card selected" data-bg="none">
+        <div class="option-thumb" style="background:#f5f5f5;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:20px;">✕</div>
+        <span>Sin fondo</span>
+      </div>
+      <div class="option-card" data-bg="floral">
+        <img class="option-thumb" src="assets/backgrounds/floral.jpg" alt="Floral" />
+        <span>Floral</span>
+      </div>
+      <div class="option-card" data-bg="romantic">
+        <img class="option-thumb" src="assets/backgrounds/romantic.jpg" alt="Romántico" />
+        <span>Romántico</span>
+      </div>
+      <div class="option-card" data-bg="couple">
+        <img class="option-thumb" src="assets/backgrounds/couple.jpg" alt="Mailen &amp; Javier" />
+        <span>M &amp; J</span>
+      </div>
+      <div class="option-card" data-bg="minimal">
+        <img class="option-thumb" src="assets/backgrounds/minimal.jpg" alt="Minimal" />
+        <span>Minimal</span>
+      </div>
+    </div>
+
+    <!-- Frame selector -->
+    <div class="section-label">Marco</div>
+    <div class="options-row" id="frame-options">
+      <div class="option-card selected" data-frame="none">
+        <div class="option-thumb" style="background:#f5f5f5;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:20px;">✕</div>
+        <span>Sin marco</span>
+      </div>
+      <div class="option-card" data-frame="polaroid">
+        <img class="option-thumb" src="assets/frames/polaroid.png" alt="Polaroid" />
+        <span>Polaroid</span>
+      </div>
+      <div class="option-card" data-frame="floral-frame">
+        <img class="option-thumb" src="assets/frames/floral-frame.png" alt="Floral" />
+        <span>Floral</span>
+      </div>
+      <div class="option-card" data-frame="gold">
+        <img class="option-thumb" src="assets/frames/gold.png" alt="Gold" />
+        <span>Dorado</span>
+      </div>
+    </div>
+
+    <!-- Text overlay -->
+    <div class="section-label">Texto personalizado</div>
+    <div class="text-input-row">
+      <input type="text" id="overlay-text" placeholder="Ej: ¡Felices para siempre! 💕" maxlength="60" />
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn btn-primary btn-full" id="btn-preview">Ver Previsualización</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: Preview & Upload -->
+  <div id="screen-preview" class="screen">
+    <div class="screen-header">
+      <button class="btn-back" id="btn-back-preview">&#8592; Volver</button>
+      <h3>Tu Foto Final</h3>
+    </div>
+
+    <div class="preview-area preview-final">
+      <canvas id="canvas-preview-final"></canvas>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn btn-primary btn-full" id="btn-upload-drive">
+        <span id="upload-btn-text">&#9650; Subir a Google Drive</span>
+        <span id="upload-spinner" class="spinner" style="display:none"></span>
+      </button>
+      <button class="btn btn-outline btn-full" id="btn-download">&#8595; Guardar en mi teléfono</button>
+      <button class="btn btn-ghost btn-full" id="btn-restart">&#8635; Nueva Foto</button>
+    </div>
+
+    <div id="upload-status" class="upload-status"></div>
+  </div>
+
+  <script src="canvas.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

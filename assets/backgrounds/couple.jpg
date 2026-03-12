@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2c2c2c"/>
+      <stop offset="100%" stop-color="#4a3728"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#g)"/>
+  <text x="540" y="480" text-anchor="middle" font-size="120" opacity="0.3">💍</text>
+  <text x="540" y="580" text-anchor="middle" font-family="Georgia,serif" font-size="52" fill="white" opacity="0.9">Mailen & Javier</text>
+  <text x="540" y="640" text-anchor="middle" font-family="Georgia,serif" font-size="28" fill="white" opacity="0.6">Mailen &amp; Javier 2025</text>
+  <text x="540" y="800" text-anchor="middle" font-family="Georgia,serif" font-size="22" fill="white" opacity="0.4">[ Replace with real image ]</text>
+</svg>

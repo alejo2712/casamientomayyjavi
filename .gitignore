@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment files — NEVER commit these
+.env
+backend/.env
+
+# Google credentials — NEVER commit
+backend/credentials/
+credentials/
+*.json
+!backend/package.json
+
+# Build output
+dist/
+build/
+.next/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# QR output (generated, not needed in repo)
+assets/qr-code.png
+assets/qr-code.svg
