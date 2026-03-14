@@ -38,6 +38,5 @@ Thumbs.db
 *.swp
 *.swo
 
-# QR output (generated, not needed in repo)
-assets/qr-code.png
-assets/qr-code.svg
+# QR output — included in repo so it can be downloaded from GitHub
+# Regenerate with: node scripts/generate-qr.js https://casamientomayyjavi.onrender.com

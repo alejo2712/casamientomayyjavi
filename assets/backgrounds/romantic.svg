@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <linearGradient id="blush-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff5f7"/>
+      <stop offset="50%" stop-color="#ffe8ee"/>
+      <stop offset="100%" stop-color="#ffd8e4"/>
+    </linearGradient>
+    <radialGradient id="center-glow" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#ffd0de" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="corner-tl" cx="0%" cy="0%" r="55%">
+      <stop offset="0%" stop-color="#ffb8cc" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ffb8cc" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="corner-tr" cx="100%" cy="0%" r="55%">
+      <stop offset="0%" stop-color="#ffb8cc" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ffb8cc" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="corner-bl" cx="0%" cy="100%" r="55%">
+      <stop offset="0%" stop-color="#ffb8cc" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ffb8cc" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="corner-br" cx="100%" cy="100%" r="55%">
+      <stop offset="0%" stop-color="#ffb8cc" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ffb8cc" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background layers -->
+  <rect width="1080" height="1080" fill="url(#blush-bg)"/>
+  <rect width="1080" height="1080" fill="url(#corner-tl)"/>
+  <rect width="1080" height="1080" fill="url(#corner-tr)"/>
+  <rect width="1080" height="1080" fill="url(#corner-bl)"/>
+  <rect width="1080" height="1080" fill="url(#corner-br)"/>
+  <rect width="1080" height="1080" fill="url(#center-glow)"/>
+
+  <!-- ── Delicate rose bud helper: small 5-petal flower ── -->
+  <!-- Top edge scattered buds -->
+  <g transform="translate(140,55)" opacity="0.7">
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(0) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(72) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(144) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(216) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(288) translate(0,-14)"/>
+    <circle r="6" fill="#e8c84a"/>
+  </g>
+  <g transform="translate(380,35)" opacity="0.55">
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(36) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(108) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(180) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(252) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(324) translate(0,-11)"/>
+    <circle r="5" fill="#e8c84a"/>
+  </g>
+  <g transform="translate(700,42)" opacity="0.6">
+    <ellipse rx="9" ry="4.5" fill="#eda8bc" transform="rotate(0) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#eda8bc" transform="rotate(72) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#eda8bc" transform="rotate(144) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#eda8bc" transform="rotate(216) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#eda8bc" transform="rotate(288) translate(0,-12)"/>
+    <circle r="5" fill="#e8c84a"/>
+  </g>
+  <g transform="translate(940,58)" opacity="0.65">
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(18) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(90) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(162) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(234) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(306) translate(0,-14)"/>
+    <circle r="6" fill="#e8c84a"/>
+  </g>
+
+  <!-- Bottom edge scattered buds -->
+  <g transform="translate(140,1025)" opacity="0.7">
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(0) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(72) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(144) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(216) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(288) translate(0,-14)"/>
+    <circle r="6" fill="#e8c84a"/>
+  </g>
+  <g transform="translate(380,1045)" opacity="0.55">
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(36) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(108) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(180) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(252) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(324) translate(0,-11)"/>
+    <circle r="5" fill="#e8c84a"/>
+  </g>
+  <g transform="translate(700,1038)" opacity="0.6">
+    <ellipse rx="9" ry="4.5" fill="#eda8bc" transform="rotate(0) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#eda8bc" transform="rotate(72) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#eda8bc" transform="rotate(144) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#eda8bc" transform="rotate(216) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#eda8bc" transform="rotate(288) translate(0,-12)"/>
+    <circle r="5" fill="#e8c84a"/>
+  </g>
+  <g transform="translate(940,1022)" opacity="0.65">
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(18) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(90) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(162) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(234) translate(0,-14)"/>
+    <ellipse rx="10" ry="5" fill="#f0a0b8" transform="rotate(306) translate(0,-14)"/>
+    <circle r="6" fill="#e8c84a"/>
+  </g>
+
+  <!-- Left edge scattered buds -->
+  <g transform="translate(40,300)" opacity="0.6">
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(36) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(108) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(180) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(252) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(324) translate(0,-11)"/>
+    <circle r="5" fill="#e8c84a"/>
+  </g>
+  <g transform="translate(35,540)" opacity="0.5">
+    <ellipse rx="7" ry="3.5" fill="#eda8bc" transform="rotate(0) translate(0,-10)"/>
+    <ellipse rx="7" ry="3.5" fill="#eda8bc" transform="rotate(72) translate(0,-10)"/>
+    <ellipse rx="7" ry="3.5" fill="#eda8bc" transform="rotate(144) translate(0,-10)"/>
+    <ellipse rx="7" ry="3.5" fill="#eda8bc" transform="rotate(216) translate(0,-10)"/>
+    <ellipse rx="7" ry="3.5" fill="#eda8bc" transform="rotate(288) translate(0,-10)"/>
+    <circle r="4" fill="#e8c84a"/>
+  </g>
+  <g transform="translate(40,780)" opacity="0.6">
+    <ellipse rx="9" ry="4.5" fill="#f0a0b8" transform="rotate(18) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#f0a0b8" transform="rotate(90) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#f0a0b8" transform="rotate(162) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#f0a0b8" transform="rotate(234) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#f0a0b8" transform="rotate(306) translate(0,-12)"/>
+    <circle r="5" fill="#e8c84a"/>
+  </g>
+
+  <!-- Right edge scattered buds -->
+  <g transform="translate(1040,300)" opacity="0.6">
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(36) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(108) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(180) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(252) translate(0,-11)"/>
+    <ellipse rx="8" ry="4" fill="#f5b8cc" transform="rotate(324) translate(0,-11)"/>
+    <circle r="5" fill="#e8c84a"/>
+  </g>
+  <g transform="translate(1045,540)" opacity="0.5">
+    <ellipse rx="7" ry="3.5" fill="#eda8bc" transform="rotate(0) translate(0,-10)"/>
+    <ellipse rx="7" ry="3.5" fill="#eda8bc" transform="rotate(72) translate(0,-10)"/>
+    <ellipse rx="7" ry="3.5" fill="#eda8bc" transform="rotate(144) translate(0,-10)"/>
+    <ellipse rx="7" ry="3.5" fill="#eda8bc" transform="rotate(216) translate(0,-10)"/>
+    <ellipse rx="7" ry="3.5" fill="#eda8bc" transform="rotate(288) translate(0,-10)"/>
+    <circle r="4" fill="#e8c84a"/>
+  </g>
+  <g transform="translate(1040,780)" opacity="0.6">
+    <ellipse rx="9" ry="4.5" fill="#f0a0b8" transform="rotate(18) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#f0a0b8" transform="rotate(90) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#f0a0b8" transform="rotate(162) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#f0a0b8" transform="rotate(234) translate(0,-12)"/>
+    <ellipse rx="9" ry="4.5" fill="#f0a0b8" transform="rotate(306) translate(0,-12)"/>
+    <circle r="5" fill="#e8c84a"/>
+  </g>
+
+  <!-- Tiny dot scatter — romantic texture -->
+  <circle cx="260" cy="80" r="3" fill="#f0a0b8" opacity="0.5"/>
+  <circle cx="540" cy="22" r="3.5" fill="#e890a8" opacity="0.45"/>
+  <circle cx="820" cy="75" r="3" fill="#f5b8cc" opacity="0.5"/>
+  <circle cx="80" cy="460" r="3" fill="#eda8bc" opacity="0.45"/>
+  <circle cx="1000" cy="620" r="3" fill="#f0a0b8" opacity="0.45"/>
+  <circle cx="260" cy="1000" r="3" fill="#f0a0b8" opacity="0.5"/>
+  <circle cx="820" cy="1005" r="3" fill="#f5b8cc" opacity="0.5"/>
+
+  <!-- Thin rose-gold border -->
+  <rect x="18" y="18" width="1044" height="1044" fill="none" stroke="#e8a0b8" stroke-width="1.5" opacity="0.6"/>
+  <rect x="28" y="28" width="1024" height="1024" fill="none" stroke="#f0c0cc" stroke-width="0.7" opacity="0.5"/>
+</svg>

@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <linearGradient id="ivory-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fffff8"/>
+      <stop offset="100%" stop-color="#faf3e0"/>
+    </linearGradient>
+    <radialGradient id="soft-center" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#f5e8c0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Ivory background -->
+  <rect width="1080" height="1080" fill="url(#ivory-bg)"/>
+  <rect width="1080" height="1080" fill="url(#soft-center)"/>
+
+  <!-- Outer gold border — double line -->
+  <rect x="24" y="24" width="1032" height="1032" fill="none" stroke="#c4a040" stroke-width="2.2" opacity="0.75"/>
+  <rect x="32" y="32" width="1016" height="1016" fill="none" stroke="#d4b050" stroke-width="0.9" opacity="0.55"/>
+  <rect x="40" y="40" width="1000" height="1000" fill="none" stroke="#c4a040" stroke-width="1.5" opacity="0.45"/>
+
+  <!-- ── Corner ornaments — gold ── -->
+  <!-- Top-left corner ornament -->
+  <g transform="translate(24,24)" opacity="0.8">
+    <!-- horizontal bar -->
+    <line x1="0" y1="0" x2="90" y2="0" stroke="#c4a040" stroke-width="2.2"/>
+    <!-- vertical bar -->
+    <line x1="0" y1="0" x2="0" y2="90" stroke="#c4a040" stroke-width="2.2"/>
+    <!-- inner accent lines -->
+    <line x1="8" y1="8" x2="64" y2="8" stroke="#d4b050" stroke-width="1.1"/>
+    <line x1="8" y1="8" x2="8" y2="64" stroke="#d4b050" stroke-width="1.1"/>
+    <!-- Corner diamond -->
+    <polygon points="0,0 7,3 3,7" fill="#c4a040"/>
+    <!-- Small decorative diamond mid-line -->
+    <polygon points="46,0 50,4 46,8 42,4" fill="#c4a040"/>
+    <polygon points="0,46 4,50 8,46 4,42" fill="#c4a040"/>
+    <!-- Tiny circle at inner corner -->
+    <circle cx="8" cy="8" r="2.5" fill="#c4a040"/>
+  </g>
+
+  <!-- Top-right corner ornament -->
+  <g transform="translate(1056,24)" opacity="0.8">
+    <line x1="0" y1="0" x2="-90" y2="0" stroke="#c4a040" stroke-width="2.2"/>
+    <line x1="0" y1="0" x2="0" y2="90" stroke="#c4a040" stroke-width="2.2"/>
+    <line x1="-8" y1="8" x2="-64" y2="8" stroke="#d4b050" stroke-width="1.1"/>
+    <line x1="-8" y1="8" x2="-8" y2="64" stroke="#d4b050" stroke-width="1.1"/>
+    <polygon points="0,0 -7,3 -3,7" fill="#c4a040"/>
+    <polygon points="-46,0 -50,4 -46,8 -42,4" fill="#c4a040"/>
+    <polygon points="0,46 4,50 8,46 4,42" fill="#c4a040"/>
+    <circle cx="-8" cy="8" r="2.5" fill="#c4a040"/>
+  </g>
+
+  <!-- Bottom-left corner ornament -->
+  <g transform="translate(24,1056)" opacity="0.8">
+    <line x1="0" y1="0" x2="90" y2="0" stroke="#c4a040" stroke-width="2.2"/>
+    <line x1="0" y1="0" x2="0" y2="-90" stroke="#c4a040" stroke-width="2.2"/>
+    <line x1="8" y1="-8" x2="64" y2="-8" stroke="#d4b050" stroke-width="1.1"/>
+    <line x1="8" y1="-8" x2="8" y2="-64" stroke="#d4b050" stroke-width="1.1"/>
+    <polygon points="0,0 7,-3 3,-7" fill="#c4a040"/>
+    <polygon points="46,0 50,-4 46,-8 42,-4" fill="#c4a040"/>
+    <polygon points="0,-46 4,-50 8,-46 4,-42" fill="#c4a040"/>
+    <circle cx="8" cy="-8" r="2.5" fill="#c4a040"/>
+  </g>
+
+  <!-- Bottom-right corner ornament -->
+  <g transform="translate(1056,1056)" opacity="0.8">
+    <line x1="0" y1="0" x2="-90" y2="0" stroke="#c4a040" stroke-width="2.2"/>
+    <line x1="0" y1="0" x2="0" y2="-90" stroke="#c4a040" stroke-width="2.2"/>
+    <line x1="-8" y1="-8" x2="-64" y2="-8" stroke="#d4b050" stroke-width="1.1"/>
+    <line x1="-8" y1="-8" x2="-8" y2="-64" stroke="#d4b050" stroke-width="1.1"/>
+    <polygon points="0,0 -7,-3 -3,-7" fill="#c4a040"/>
+    <polygon points="-46,0 -50,-4 -46,-8 -42,-4" fill="#c4a040"/>
+    <polygon points="0,-46 4,-50 8,-46 4,-42" fill="#c4a040"/>
+    <circle cx="-8" cy="-8" r="2.5" fill="#c4a040"/>
+  </g>
+
+  <!-- Mid-side tick marks on border -->
+  <!-- Top -->
+  <line x1="540" y1="24" x2="540" y2="44" stroke="#c4a040" stroke-width="1.8" opacity="0.6"/>
+  <polygon points="540,24 544,28 540,32 536,28" fill="#c4a040" opacity="0.6"/>
+  <!-- Bottom -->
+  <line x1="540" y1="1056" x2="540" y2="1036" stroke="#c4a040" stroke-width="1.8" opacity="0.6"/>
+  <polygon points="540,1056 544,1052 540,1048 536,1052" fill="#c4a040" opacity="0.6"/>
+  <!-- Left -->
+  <line x1="24" y1="540" x2="44" y2="540" stroke="#c4a040" stroke-width="1.8" opacity="0.6"/>
+  <polygon points="24,540 28,544 32,540 28,536" fill="#c4a040" opacity="0.6"/>
+  <!-- Right -->
+  <line x1="1056" y1="540" x2="1036" y2="540" stroke="#c4a040" stroke-width="1.8" opacity="0.6"/>
+  <polygon points="1056,540 1052,544 1048,540 1052,536" fill="#c4a040" opacity="0.6"/>
+
+  <!-- Central minimal monogram area — very subtle, only at the very bottom so it doesn't compete with person -->
+  <text x="540" y="1010" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="22" fill="#c4a040" opacity="0.55" letter-spacing="8">M &amp; J</text>
+  <!-- small decorative line under text -->
+  <line x1="480" y1="1018" x2="600" y2="1018" stroke="#c4a040" stroke-width="0.8" opacity="0.4"/>
+  <polygon points="540,1022 543,1025 540,1028 537,1025" fill="#c4a040" opacity="0.4"/>
+</svg>
