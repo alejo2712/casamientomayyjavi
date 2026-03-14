@@ -34,8 +34,12 @@ const dotenvResult = require('dotenv').config({ path: ENV_FILE });
 
   if (missing.length > 0) {
     console.error(`\n[env] FATAL — missing required variable(s): ${missing.join(', ')}`);
-    console.error(`[env] Open the .env file at: ${ENV_FILE}`);
-    console.error('[env] Fill in the missing values and restart the server.\n');
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[env] Add these variables in the Render dashboard → your service → Environment tab.');
+    } else {
+      console.error(`[env] Open the .env file at: ${ENV_FILE}`);
+      console.error('[env] Fill in the missing values and restart the server.\n');
+    }
     process.exit(1);
   }
 
@@ -206,19 +210,32 @@ app.use((err, _req, res, _next) => {
 });
 
 // ---- Start ----
-app.listen(PORT, () => {
+// Bind to 0.0.0.0 so Render (and other cloud platforms) can route traffic to the process.
+// Locally this behaves identically — all interfaces are reachable on localhost.
+app.listen(PORT, '0.0.0.0', () => {
+  const isProduction = process.env.NODE_ENV === 'production';
+
   console.log(`Wedding Photo Booth server running on port ${PORT}`);
-  console.log(`Open: http://localhost:${PORT}`);
+  if (!isProduction) {
+    console.log(`Open: http://localhost:${PORT}`);
+  }
 
   if (!refreshTokenExists()) {
-    const authUrl = `http://localhost:${PORT}/auth/google`;
-    console.log(`\n[Drive] No refresh token found — opening browser to authorize...`);
-    console.log(`[Drive] Auth URL: ${authUrl}\n`);
+    console.log('\n[Drive] No refresh token found.');
+    if (isProduction) {
+      // On Render there is no browser — instruct the operator via logs.
+      console.log('[Drive] Set GOOGLE_REFRESH_TOKEN in the Render dashboard → Environment tab.');
+      console.log('[Drive] Then redeploy for the change to take effect.');
+    } else {
+      const authUrl = `http://localhost:${PORT}/auth/google`;
+      console.log(`[Drive] Opening browser to authorize...`);
+      console.log(`[Drive] Auth URL: ${authUrl}\n`);
 
-    // Open the default browser — works on macOS, Windows, and Linux
-    const cmd = process.platform === 'win32' ? `start "${authUrl}"`
-              : process.platform === 'darwin' ? `open "${authUrl}"`
-              : `xdg-open "${authUrl}"`;
-    exec(cmd);
+      // Open the default browser — works on macOS, Windows, and Linux
+      const cmd = process.platform === 'win32' ? `start "${authUrl}"`
+                : process.platform === 'darwin' ? `open "${authUrl}"`
+                : `xdg-open "${authUrl}"`;
+      exec(cmd);
+    }
   }
 });

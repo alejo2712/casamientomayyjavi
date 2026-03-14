@@ -149,6 +149,51 @@ casamientomayyjavi/
 
 ---
 
+## Deploying to Render
+
+The app runs as a single Node.js service — Express serves the frontend, assets, and API from one URL.
+
+### Build & start commands
+
+| Setting | Value |
+|---------|-------|
+| **Build command** | `npm install` |
+| **Start command** | `npm start` |
+| **Node version** | 18 or higher |
+
+### Required environment variables
+
+Set these in the Render dashboard → your service → **Environment** tab:
+
+| Variable | Description |
+|----------|-------------|
+| `GOOGLE_CLIENT_ID` | OAuth 2.0 client ID from Google Cloud Console |
+| `GOOGLE_CLIENT_SECRET` | OAuth 2.0 client secret |
+| `GOOGLE_REDIRECT_URI` | `https://<your-service>.onrender.com/oauth2callback` |
+| `GOOGLE_REFRESH_TOKEN` | Refresh token — run `cat backend/config/tokens.json` locally to get it |
+| `DRIVE_FOLDER_ID` | Google Drive folder ID where photos are saved |
+| `NODE_ENV` | `production` |
+
+> **Do not add a `.env` file to the repo.** Render injects variables directly into the process.
+
+### Google Cloud Console — update the redirect URI
+
+After Render assigns your service URL, add it as an authorized redirect URI:
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) → **APIs & Services → Credentials**
+2. Click your OAuth 2.0 Client ID
+3. Under **Authorized redirect URIs** → **Add URI**
+4. Add: `https://<your-service>.onrender.com/oauth2callback`
+5. Save
+
+### After deployment
+
+- Health check: `https://<your-service>.onrender.com/health`
+- QR code URL: `https://<your-service>.onrender.com`
+- **Free tier note:** Render spins the service down after 15 min of inactivity. Visit the URL yourself before the party to wake it up.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
