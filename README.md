@@ -1,6 +1,124 @@
 # Mailen & Javier — Wedding Photo Booth
 
-A mobile-first web application that lets wedding guests take or upload photos, add backgrounds, frames, and text, then share them directly to Google Drive.
+A mobile-first web app for wedding guests to take or upload a photo, pick a background and frame, add personalized text, then save it or upload it to Google Drive.
+
+---
+
+## Quick Start
+
+```bash
+# From the project root:
+npm install
+npm start
+# App runs at http://localhost:3000
+```
+
+> Always run from the **project root** (`casamientomayyjavi/`), not from `backend/`.
+
+Development mode (auto-restarts on file changes):
+
+```bash
+npm run dev
+```
+
+---
+
+## One-Time Admin Authorization (Google Drive)
+
+Photos upload to Google Drive under the admin's account. This requires a single OAuth2 authorization that generates a long-lived refresh token. **Guests never see a login screen.**
+
+### How it works automatically
+
+1. On first startup, the server checks for a stored refresh token.
+2. If none exists, it **automatically opens your browser** to Google's authorization page.
+3. You (the admin) sign in and click **Allow**.
+4. Google redirects back to `http://localhost:3000/oauth2callback`.
+5. The server saves the token to `backend/config/tokens.json`.
+6. All future uploads use that token silently — no re-auth needed.
+
+### Where the refresh token is stored
+
+| Location | Priority | Notes |
+|----------|----------|-------|
+| `GOOGLE_REFRESH_TOKEN` in `.env` | 1st (highest) | Optional — set manually if preferred |
+| `backend/config/tokens.json` | 2nd | Auto-created after first auth, gitignored |
+
+If you ever need to re-authorize (token revoked or expired):
+1. Go to [myaccount.google.com/permissions](https://myaccount.google.com/permissions), find the app, remove access.
+2. Delete `backend/config/tokens.json` (and clear `GOOGLE_REFRESH_TOKEN` in `.env` if set).
+3. Restart the server — the browser will open automatically again.
+
+### Alternative: standalone token generator
+
+If the auto-open doesn't work (e.g. headless server):
+
+```bash
+node scripts/get-token.js
+```
+
+This starts a temporary server on port 3000, prints an auth URL, and saves `tokens.json` on success.
+
+---
+
+## Environment Variables
+
+Create a `.env` file in the **project root**:
+
+```env
+PORT=3000
+GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-client-secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/oauth2callback
+GOOGLE_REFRESH_TOKEN=          # leave blank — filled automatically after first auth
+DRIVE_FOLDER_ID=your-google-drive-folder-id
+```
+
+The server validates `DRIVE_FOLDER_ID`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REDIRECT_URI` on startup and exits with a clear error if any are missing.
+
+---
+
+## Adding New Backgrounds or Frames
+
+All asset configuration lives in **`frontend/config.js`** — this is the only file you need to edit.
+
+### Add a background
+
+1. Copy your image to `assets/backgrounds/yourimage.jpg`
+2. Add an entry to `BOOTH_CONFIG.backgrounds` in `frontend/config.js`:
+
+```js
+{
+  id:    'yourimage',                             // unique key, no spaces
+  label: 'Your Label',                           // shown to guests in the app
+  path:  'assets/backgrounds/yourimage.jpg',
+  thumb: 'assets/backgrounds/yourimage.jpg',
+},
+```
+
+3. Restart the server — the new option appears automatically in the app.
+
+### Add a frame
+
+1. Copy your PNG (must have transparency) to `assets/frames/yourframe.png`
+2. Add an entry to `BOOTH_CONFIG.frames` in `frontend/config.js`:
+
+```js
+{
+  id:    'yourframe',
+  label: 'Your Label',
+  path:  'assets/frames/yourframe.png',
+  thumb: 'assets/frames/yourframe.png',
+},
+```
+
+Frame images are drawn at full canvas size (1080×1080 px) on top of the photo. Design them with transparency where the photo should show through.
+
+### Recommended asset sizes
+
+| File | Size | Format |
+|------|------|--------|
+| `assets/backgrounds/*.jpg` | 1080×1080 px | JPEG |
+| `assets/frames/*.png` | 1080×1080 px | PNG with transparency |
 
 ---
 
@@ -8,228 +126,26 @@ A mobile-first web application that lets wedding guests take or upload photos, a
 
 ```
 casamientomayyjavi/
-├── frontend/               # Static web app (HTML + CSS + JS)
+├── package.json              # Root package — run npm start/install from here
+├── .env                      # Not committed — create from template above
+├── .gitignore
+├── assets/
+│   ├── backgrounds/          # Background images, served at /assets/backgrounds/
+│   └── frames/               # Frame PNGs, served at /assets/frames/
+├── frontend/
 │   ├── index.html
 │   ├── style.css
-│   ├── app.js              # Screen navigation, camera, file upload logic
-│   └── canvas.js           # HTML5 Canvas composition engine
-├── backend/                # Node.js + Express server
-│   ├── server.js           # API server + Google Drive upload
-│   ├── package.json
-│   └── .env.example        # Environment variable template
-├── assets/
-│   ├── backgrounds/        # Background images (4 options)
-│   └── frames/             # Frame overlays (3 options)
-├── scripts/
-│   ├── generate-placeholders.js   # Create SVG placeholder assets
-│   └── generate-qr.js             # Generate QR code for the deployed URL
-└── README.md
+│   ├── config.js             # BOOTH_CONFIG — edit this to add backgrounds/frames
+│   ├── app.js                # Screen navigation, camera, file input, events
+│   └── canvas.js             # Photo composition engine (HTML5 Canvas)
+├── backend/
+│   ├── server.js             # Express server + OAuth routes + upload endpoint
+│   └── config/
+│       ├── googleDrive.js    # OAuth2 client singleton + Drive upload logic
+│       └── tokens.json       # Auto-created after first auth (gitignored)
+└── scripts/
+    └── get-token.js          # Standalone one-time OAuth token generator
 ```
-
----
-
-## Quick Start (Local Development)
-
-### 1. Generate placeholder assets
-
-```bash
-node scripts/generate-placeholders.js
-```
-
-### 2. Serve the frontend
-
-Use any static server:
-
-```bash
-# Option A — VS Code Live Server extension (recommended)
-# Open frontend/index.html and click "Go Live"
-
-# Option B — Python
-python3 -m http.server 5500 --directory frontend
-
-# Option C — npx
-npx serve frontend
-```
-
-### 3. Set up and start the backend
-
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Edit .env with your Google Drive credentials
-node server.js
-```
-
-Backend runs at `http://localhost:3001`.
-
-Update `frontend/app.js` line containing `window.BACKEND_URL` or add to your HTML:
-
-```html
-<script>window.BACKEND_URL = 'http://localhost:3001/upload-photo';</script>
-```
-
----
-
-## Google Drive Setup
-
-### Step 1 — Create a Google Cloud project
-
-1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. Create a new project (e.g. `casamientomayyjavi`)
-3. Enable the **Google Drive API** for that project
-
-### Step 2 — Create a Service Account
-
-1. Go to **IAM & Admin → Service Accounts**
-2. Click **Create Service Account**
-3. Name it `wedding-photo-booth`
-4. Skip role assignment (click Continue → Done)
-5. Click the service account → **Keys** tab → **Add Key → JSON**
-6. Download the JSON file
-
-### Step 3 — Configure credentials
-
-**For local development:**
-
-```bash
-mkdir backend/credentials
-# Place the downloaded JSON as:
-mv ~/Downloads/your-key-file.json backend/credentials/service-account.json
-```
-
-Edit `backend/.env`:
-
-```env
-GOOGLE_SERVICE_ACCOUNT_PATH=./credentials/service-account.json
-GOOGLE_DRIVE_FOLDER_NAME=Mailen_Javier_Wedding_Photos
-```
-
-**For cloud deployment (Railway / Vercel):**
-
-Copy the entire contents of the JSON file and set it as an environment variable:
-
-```env
-GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"...entire JSON..."}
-```
-
-### Step 4 — Share the target Drive folder (optional)
-
-If you want photos to appear in a specific Drive folder you own:
-
-1. Create a folder in Google Drive named `Mailen_Javier_Wedding_Photos`
-2. Right-click → Share → paste the Service Account email (e.g. `wedding-photo-booth@your-project.iam.gserviceaccount.com`)
-3. Give it **Editor** access
-4. Copy the folder ID from the URL and set `GOOGLE_DRIVE_FOLDER_ID=<id>` in `.env`
-
----
-
-## Replacing Placeholder Assets
-
-Replace the SVG placeholders in `assets/backgrounds/` and `assets/frames/` with real images:
-
-| File | Recommended size | Description |
-|------|-----------------|-------------|
-| `backgrounds/floral.jpg` | 1080×1080 px | Elegant floral pattern |
-| `backgrounds/romantic.jpg` | 1080×1080 px | Romantic rose/blush tones |
-| `backgrounds/couple.jpg` | 1080×1080 px | Photo of Mailen & Javier |
-| `backgrounds/minimal.jpg` | 1080×1080 px | Clean white/cream background |
-| `frames/polaroid.png` | 1080×1080 px | Polaroid frame with transparent center |
-| `frames/floral-frame.png` | 1080×1080 px | Floral wedding frame PNG |
-| `frames/gold.png` | 1080×1080 px | Gold elegant frame PNG |
-
-> **Important:** Frame images must be **PNG with transparency** so the photo shows through.
-
----
-
-## GitHub Setup
-
-```bash
-cd /path/to/casamientomayyjavi
-
-# Initialize repository
-git init
-git add .
-git commit -m "Initial commit — Mailen & Javier Wedding Photo Booth"
-
-# Create GitHub repo and push
-gh repo create casamientomayyjavi --public --source=. --remote=origin --push
-
-# Or manually:
-git remote add origin https://github.com/YOUR_USERNAME/casamientomayyjavi.git
-git branch -M main
-git push -u origin main
-```
-
----
-
-## Deployment
-
-### Option A — Railway (Recommended — full stack)
-
-Railway can host both frontend and backend together.
-
-1. Push code to GitHub
-2. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub
-3. Select your repo
-4. Set environment variables in Railway dashboard:
-   - `PORT=3001`
-   - `GOOGLE_SERVICE_ACCOUNT_JSON=<paste full JSON>`
-   - `GOOGLE_DRIVE_FOLDER_NAME=Mailen_Javier_Wedding_Photos`
-   - `SERVE_FRONTEND=true`
-   - `ALLOWED_ORIGINS=https://your-railway-domain.up.railway.app`
-5. Set the **Start Command**: `node backend/server.js`
-6. Railway assigns a domain like `casamientomayyjavi.up.railway.app`
-
-### Option B — Vercel (Frontend) + Railway (Backend)
-
-**Frontend on Vercel:**
-
-1. Go to [vercel.com](https://vercel.com) → New Project → Import from GitHub
-2. Set **Root Directory** to `frontend`
-3. No build command needed (static site)
-4. Deploy → get URL like `casamientomayyjavi.vercel.app`
-5. Update `app.js`: set `window.BACKEND_URL` to your Railway backend URL
-
-**Backend on Railway:**
-
-Follow Option A but set `SERVE_FRONTEND=false` and add the Vercel URL to `ALLOWED_ORIGINS`.
-
----
-
-## QR Code Generation
-
-After deploying, generate the QR code:
-
-```bash
-cd casamientomayyjavi
-
-# Install QR generator
-npm install qrcode
-
-# Generate QR pointing to your deployed URL
-node scripts/generate-qr.js https://casamientomayyjavi.up.railway.app
-```
-
-This outputs:
-- `assets/qr-code.png` — 1200px PNG for printing (gold color)
-- `assets/qr-code.svg` — Vector SVG for large-format printing
-- Terminal preview
-
-**Print suggestions:**
-- Table cards: 5×5 cm QR + "Scan to share your moment 📸"
-- Backdrop sign: large format with names and QR
-- Use [qr.io](https://qr.io) for a branded QR with a logo center
-
----
-
-## Security Notes
-
-- Max file size: 10MB enforced server-side
-- Only `image/jpeg`, `image/png`, `image/webp` accepted
-- CORS restricted to configured origins
-- Service account credentials are never exposed to the frontend
-- `.gitignore` excludes all `.env` files and credential JSON files
 
 ---
 
@@ -239,10 +155,10 @@ This outputs:
 |-------|-----------|
 | Frontend | HTML5, CSS3, Vanilla JS, Canvas API |
 | Backend | Node.js, Express.js |
-| File Upload | Multer (in-memory) |
+| File Upload | Multer (in-memory, 10 MB limit) |
 | Cloud Storage | Google Drive API v3 |
-| Auth | Google Service Account |
-| Deployment | Railway or Vercel |
+| Auth | OAuth2 (personal Google account, refresh token) |
+| Fonts | Playfair Display + Inter (Google Fonts) |
 
 ---
 

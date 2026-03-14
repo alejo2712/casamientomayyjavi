@@ -1,34 +1,66 @@
 'use strict';
 
-require('dotenv').config();
+const path = require('path');
+
+const ENV_FILE = path.join(__dirname, '..', '.env');
+const dotenvResult = require('dotenv').config({ path: ENV_FILE });
+
+// ---- Startup: environment validation ----
+// Runs before anything else. Prints status of every required variable.
+// Exits immediately if any are missing so the problem is obvious.
+(function validateEnv() {
+  if (dotenvResult.error) {
+    console.warn(`[env] WARNING: could not load .env file at ${ENV_FILE}`);
+    console.warn('[env]          Falling back to system environment variables.');
+  } else {
+    console.log(`[env] Loaded: ${ENV_FILE}`);
+  }
+
+  // GOOGLE_REFRESH_TOKEN is intentionally excluded — it can be obtained
+  // at runtime by visiting /auth/google and stored in tokens.json.
+  const REQUIRED = [
+    'DRIVE_FOLDER_ID',
+    'GOOGLE_CLIENT_ID',
+    'GOOGLE_CLIENT_SECRET',
+    'GOOGLE_REDIRECT_URI',
+  ];
+
+  const missing = [];
+  for (const key of REQUIRED) {
+    const present = Boolean(process.env[key]);
+    console.log(`[env]   ${key}: ${present ? 'present' : 'MISSING ✗'}`);
+    if (!present) missing.push(key);
+  }
+
+  if (missing.length > 0) {
+    console.error(`\n[env] FATAL — missing required variable(s): ${missing.join(', ')}`);
+    console.error(`[env] Open the .env file at: ${ENV_FILE}`);
+    console.error('[env] Fill in the missing values and restart the server.\n');
+    process.exit(1);
+  }
+
+  console.log('[env] All required variables present.\n');
+}());
 
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
-const path = require('path');
-const { google } = require('googleapis');
-const { Readable } = require('stream');
+const { exec } = require('child_process');
+const { getOAuthClient, setRefreshToken, refreshTokenExists, uploadToDrive } = require('./config/googleDrive');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
+
+// ---- Static files ----
+// Serve frontend and assets from project root
+const frontendPath = path.join(__dirname, '..', 'frontend');
+const assetsPath = path.join(__dirname, '..', 'assets');
+
+app.use(express.static(frontendPath));
+app.use('/assets', express.static(assetsPath));
 
 // ---- CORS ----
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim())
-  : ['http://localhost:3000', 'http://localhost:5500', 'http://127.0.0.1:5500'];
-
-app.use(cors({
-  origin: (origin, cb) => {
-    // Allow requests with no origin (e.g. mobile direct, curl)
-    if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
-      cb(null, true);
-    } else {
-      cb(new Error('CORS not allowed for origin: ' + origin));
-    }
-  },
-  methods: ['POST', 'GET', 'OPTIONS'],
-}));
-
+app.use(cors());
 app.use(express.json());
 
 // ---- Multer — in-memory storage ----
@@ -47,108 +79,10 @@ const upload = multer({
   },
 });
 
-// ---- Google Drive helper ----
-function getDriveClient() {
-  // Option A: JSON credentials file path
-  if (process.env.GOOGLE_SERVICE_ACCOUNT_PATH) {
-    const auth = new google.auth.GoogleAuth({
-      keyFile: process.env.GOOGLE_SERVICE_ACCOUNT_PATH,
-      scopes: ['https://www.googleapis.com/auth/drive.file'],
-    });
-    return google.drive({ version: 'v3', auth });
-  }
-
-  // Option B: Inline JSON (for Railway / Vercel env vars)
-  if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
-    const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-    const auth = new google.auth.GoogleAuth({
-      credentials,
-      scopes: ['https://www.googleapis.com/auth/drive.file'],
-    });
-    return google.drive({ version: 'v3', auth });
-  }
-
-  throw new Error('Google Drive credentials not configured. Set GOOGLE_SERVICE_ACCOUNT_PATH or GOOGLE_SERVICE_ACCOUNT_JSON.');
-}
-
-/**
- * Find or create the target folder in Google Drive.
- * Returns the folder ID.
- */
-async function getOrCreateFolder(drive, folderName) {
-  // If explicit folder ID is set, use it directly
-  if (process.env.GOOGLE_DRIVE_FOLDER_ID) {
-    return process.env.GOOGLE_DRIVE_FOLDER_ID;
-  }
-
-  // Search for existing folder
-  const res = await drive.files.list({
-    q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`,
-    fields: 'files(id, name)',
-    pageSize: 1,
-  });
-
-  if (res.data.files.length > 0) {
-    return res.data.files[0].id;
-  }
-
-  // Create new folder
-  const folder = await drive.files.create({
-    requestBody: {
-      name: folderName,
-      mimeType: 'application/vnd.google-apps.folder',
-    },
-    fields: 'id',
-  });
-
-  return folder.data.id;
-}
-
-/**
- * Upload a buffer to Google Drive.
- * Returns the file's web view link.
- */
-async function uploadToGoogleDrive(buffer, filename, mimeType) {
-  const drive = getDriveClient();
-  const FOLDER_NAME = process.env.GOOGLE_DRIVE_FOLDER_NAME || 'Mailen_Javier_Wedding_Photos';
-
-  const folderId = await getOrCreateFolder(drive, FOLDER_NAME);
-
-  // Convert buffer to readable stream
-  const readableStream = Readable.from(buffer);
-
-  const res = await drive.files.create({
-    requestBody: {
-      name: filename,
-      parents: [folderId],
-    },
-    media: {
-      mimeType,
-      body: readableStream,
-    },
-    fields: 'id, name, webViewLink',
-  });
-
-  // Make file readable by anyone with the link (optional — remove if private is preferred)
-  try {
-    await drive.permissions.create({
-      fileId: res.data.id,
-      requestBody: {
-        role: 'reader',
-        type: 'anyone',
-      },
-    });
-  } catch (_) {
-    // Non-critical — file still uploaded even if sharing fails
-  }
-
-  return res.data;
-}
-
 // ---- Routes ----
 
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'casamientomayyjavi-backend' });
+  res.json({ status: 'ok', service: 'casamientomayyjavi' });
 });
 
 /**
@@ -165,41 +99,104 @@ app.post('/upload-photo', upload.single('photo'), async (req, res) => {
   const filename = `wedding-photo-${timestamp}.${ext}`;
 
   try {
-    const driveFile = await uploadToGoogleDrive(
-      req.file.buffer,
-      filename,
-      req.file.mimetype
-    );
+    const fileId = await uploadToDrive(req.file.buffer, filename, req.file.mimetype);
+
+    console.log('Photo uploaded to Google Drive successfully');
 
     return res.status(200).json({
       success: true,
       message: 'Photo uploaded successfully!',
-      filename: driveFile.name,
-      fileId: driveFile.id,
-      link: driveFile.webViewLink,
+      filename,
+      fileId,
     });
   } catch (err) {
-    console.error('Drive upload error:', err.message);
-    return res.status(500).json({
-      error: 'Failed to upload to Google Drive.',
-      detail: err.message,
-    });
+    console.error('Upload error:', err.message);
+    return res.status(500).json({ error: 'Upload failed.', detail: err.message });
   }
 });
 
-// ---- Serve frontend in production (optional) ----
-if (process.env.SERVE_FRONTEND === 'true') {
-  const frontendPath = path.join(__dirname, '..', 'frontend');
-  app.use(express.static(frontendPath));
-  app.get('*', (_req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
+// ---- Google OAuth authorization routes ----
+// These routes live entirely in the backend — no secrets reach the browser.
+
+/**
+ * GET /auth/google
+ * Redirects the user to Google's consent screen.
+ * Open this in a browser: http://localhost:3000/auth/google
+ */
+app.get('/auth/google', (_req, res) => {
+  const client = getOAuthClient();
+  const url = client.generateAuthUrl({
+    access_type: 'offline',   // required to receive a refresh_token
+    prompt: 'consent',        // forces Google to issue a new refresh_token every time
+    scope: ['https://www.googleapis.com/auth/drive.file'],
   });
-}
+  console.log('[OAuth] Redirecting to Google consent screen...');
+  res.redirect(url);
+});
+
+/**
+ * GET /oauth2callback
+ * Google redirects here after the user grants (or denies) access.
+ * Exchanges the authorization code for tokens and saves the refresh token.
+ */
+app.get('/oauth2callback', async (req, res) => {
+  const { code, error } = req.query;
+
+  if (error) {
+    console.error('[OAuth] User denied access or error occurred:', error);
+    return res.status(400).send(`Authorization denied: ${error}`);
+  }
+
+  if (!code) {
+    return res.status(400).send('Missing authorization code from Google.');
+  }
+
+  try {
+    const client = getOAuthClient();
+    const { tokens } = await client.getToken(code);
+
+    if (!tokens.refresh_token) {
+      console.warn('[OAuth] Google did not return a refresh_token.');
+      console.warn('[OAuth] To force a new one: revoke access at https://myaccount.google.com/permissions then try /auth/google again.');
+      return res.status(400).send(
+        'Google did not return a refresh token. ' +
+        'Revoke the app access at https://myaccount.google.com/permissions and try again.'
+      );
+    }
+
+    setRefreshToken(tokens.refresh_token);
+
+    console.log('\n[OAuth] ================================================');
+    console.log('[OAuth] Authorization successful!');
+    console.log('[OAuth] REFRESH TOKEN:');
+    console.log(tokens.refresh_token);
+    console.log('[OAuth] Saved to backend/config/tokens.json');
+    console.log('[OAuth] Optionally copy it to .env as GOOGLE_REFRESH_TOKEN');
+    console.log('[OAuth] ================================================\n');
+
+    res.send(`
+      <html><body style="font-family:sans-serif;padding:40px;text-align:center">
+        <h2>&#10003; Authorization successful!</h2>
+        <p>The refresh token has been saved to <code>backend/config/tokens.json</code>.</p>
+        <p>Check your terminal — the token is printed there too.</p>
+        <p>You can close this window and start using the photo booth.</p>
+      </body></html>
+    `);
+  } catch (err) {
+    console.error('[OAuth] Token exchange error:', err.message);
+    res.status(500).send('OAuth error: ' + err.message);
+  }
+});
+
+// Catch-all: serve index.html for any unmatched route
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // ---- Multer error handler ----
 app.use((err, _req, res, _next) => {
   if (err.code === 'LIMIT_FILE_SIZE') {
-    return res.status(413).json({ error: 'File too large. Maximum size is 10MB.' });
+    return res.status(413).json({ error: 'File too large. Maximum is 10MB.' });
   }
   if (err.message && err.message.includes('Only image')) {
     return res.status(415).json({ error: err.message });
@@ -210,6 +207,18 @@ app.use((err, _req, res, _next) => {
 
 // ---- Start ----
 app.listen(PORT, () => {
-  console.log(`Wedding Photo Booth backend running on port ${PORT}`);
-  console.log(`Health check: http://localhost:${PORT}/health`);
+  console.log(`Wedding Photo Booth server running on port ${PORT}`);
+  console.log(`Open: http://localhost:${PORT}`);
+
+  if (!refreshTokenExists()) {
+    const authUrl = `http://localhost:${PORT}/auth/google`;
+    console.log(`\n[Drive] No refresh token found — opening browser to authorize...`);
+    console.log(`[Drive] Auth URL: ${authUrl}\n`);
+
+    // Open the default browser — works on macOS, Windows, and Linux
+    const cmd = process.platform === 'win32' ? `start "${authUrl}"`
+              : process.platform === 'darwin' ? `open "${authUrl}"`
+              : `xdg-open "${authUrl}"`;
+    exec(cmd);
+  }
 });

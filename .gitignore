@@ -9,8 +9,15 @@ backend/.env
 # Google credentials — NEVER commit
 backend/credentials/
 credentials/
+backend/config/credentials.json
+backend/config/tokens.json
+
+# Ignore all JSON except package files and lock files
 *.json
+!package.json
+!package-lock.json
 !backend/package.json
+!backend/package-lock.json
 
 # Build output
 dist/

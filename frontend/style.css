@@ -1,49 +1,77 @@
-/* =========================================
-   Mailen & Javier — Wedding Photo Booth CSS
-   Mobile-first design
-   ========================================= */
+/* =========================================================
+   Mailen & Javier — Wedding Photo Booth
+   Mobile-first responsive CSS
+   Fonts: Playfair Display (headings) + Inter (body)
+   ========================================================= */
 
+/* ---- Reset ---- */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* ---- Design tokens ---- */
 :root {
-  --gold: #b8860b;
-  --gold-light: #d4a017;
-  --gold-pale: #f5e6c8;
-  --rose: #c8748a;
-  --rose-light: #f9e4ea;
-  --white: #ffffff;
-  --off-white: #faf8f5;
-  --dark: #2c2c2c;
-  --gray: #888;
-  --radius: 16px;
-  --shadow: 0 4px 24px rgba(0,0,0,0.12);
-  --header-h: 56px;
+  --gold:        #C89B3C;
+  --gold-dark:   #a07828;
+  --gold-pale:   #F5E9CC;
+  --ivory:       #F9F6F2;
+  --ivory-dark:  #EDE8E0;
+  --rose:        #C4788A;
+  --rose-light:  #F5E0E6;
+  --white:       #FFFFFF;
+  --dark:        #2C2C2C;
+  --mid:         #666666;
+  --light:       #AAAAAA;
+  --border:      rgba(200,155,60,0.18);
+
+  --radius-sm:   8px;
+  --radius:      14px;
+  --radius-lg:   20px;
+
+  --shadow-sm:   0 2px 8px rgba(0,0,0,0.08);
+  --shadow:      0 4px 20px rgba(0,0,0,0.12);
+  --shadow-gold: 0 4px 16px rgba(200,155,60,0.30);
+
+  --header-h:    54px;
+  --btn-h:       52px;
+
+  --font-title:  'Playfair Display', Georgia, serif;
+  --font-body:   'Inter', system-ui, sans-serif;
 }
 
-html, body {
+/* ---- Base ---- */
+html {
   height: 100%;
-  width: 100%;
-  overflow: hidden;
-  font-family: 'Georgia', serif;
-  background: var(--off-white);
-  color: var(--dark);
+  -webkit-text-size-adjust: 100%;
 }
 
-/* ---- SCREENS ---- */
+body {
+  height: 100%;
+  font-family: var(--font-body);
+  background: var(--ivory);
+  color: var(--dark);
+  overflow: hidden;        /* body never scrolls — screens handle scroll */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================================
+   SCREEN SYSTEM
+   Each screen: position:fixed, fills viewport, handles own scroll
+   ========================================================= */
 .screen {
   position: fixed;
   inset: 0;
   display: flex;
   flex-direction: column;
+  background: var(--ivory);
+  /* Hidden state */
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.35s ease, transform 0.35s ease;
-  transform: translateX(60px);
-  background: var(--off-white);
+  transform: translateX(48px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  /* Default: whole screen scrolls */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -56,10 +84,53 @@ html, body {
 
 .screen.slide-out {
   opacity: 0;
-  transform: translateX(-60px);
+  transform: translateX(-48px);
 }
 
-/* ---- WELCOME SCREEN ---- */
+/* ---- Shared header ---- */
+.screen-header {
+  display: flex;
+  align-items: center;
+  min-height: var(--header-h);
+  padding: 0 16px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.screen-title {
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+  flex: 1;
+  text-align: center;
+  /* Offset left button so title is visually centered */
+  padding-right: 80px;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: var(--gold);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 10px 8px 10px 0;
+  min-height: 44px;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  letter-spacing: 0.3px;
+}
+
+/* =========================================================
+   SCREEN 1: WELCOME
+   ========================================================= */
 #screen-welcome {
   align-items: center;
   justify-content: center;
@@ -70,8 +141,8 @@ html, body {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(160deg, rgba(212,160,23,0.18) 0%, rgba(200,116,138,0.18) 60%, rgba(212,160,23,0.10) 100%),
-    url('assets/backgrounds/floral.jpg') center/cover no-repeat;
+    linear-gradient(160deg, rgba(200,155,60,0.15) 0%, rgba(196,120,138,0.12) 60%, rgba(200,155,60,0.08) 100%),
+    url('assets/backgrounds/floral.jpg') center / cover no-repeat;
   z-index: 0;
 }
 
@@ -79,7 +150,7 @@ html, body {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(255,255,255,0.72);
+  background: rgba(249,246,242,0.78);
 }
 
 .welcome-content {
@@ -89,56 +160,59 @@ html, body {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 40px 24px 60px;
-  max-width: 420px;
+  padding: 48px 28px 64px;
   width: 100%;
+  max-width: 400px;
 }
 
 .rings-icon {
-  font-size: 52px;
-  margin-bottom: 12px;
-  animation: float 3s ease-in-out infinite;
+  font-size: 56px;
+  margin-bottom: 16px;
+  animation: float 3.5s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(200,155,60,0.25));
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
 }
 
 .title {
-  font-size: 2.4rem;
-  font-weight: bold;
-  color: var(--gold);
-  letter-spacing: 1px;
+  font-family: var(--font-title);
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--gold-dark);
   line-height: 1.1;
-  text-shadow: 0 2px 8px rgba(184,134,11,0.2);
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 12px rgba(200,155,60,0.18);
 }
 
 .subtitle {
-  font-size: 1.1rem;
-  color: var(--rose);
-  margin-top: 6px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  font-family: var(--font-title);
+  font-size: 1rem;
   font-style: italic;
+  color: var(--rose);
+  margin-top: 8px;
+  letter-spacing: 2px;
 }
 
 .tagline {
-  font-size: 1rem;
-  color: var(--dark);
+  font-size: 0.95rem;
+  color: var(--mid);
   margin-top: 20px;
-  margin-bottom: 36px;
-  opacity: 0.8;
-  font-style: italic;
+  margin-bottom: 40px;
+  line-height: 1.5;
 }
 
-/* ---- BUTTONS ---- */
+/* =========================================================
+   BUTTONS
+   ========================================================= */
 .btn-group {
   display: flex;
   flex-direction: column;
   gap: 14px;
   width: 100%;
-  max-width: 300px;
+  max-width: 290px;
 }
 
 .btn {
@@ -146,16 +220,19 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 10px;
+  min-height: var(--btn-h);
+  padding: 14px 24px;
   border: none;
   border-radius: var(--radius);
-  font-size: 1.05rem;
-  font-family: inherit;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 16px 24px;
-  font-weight: bold;
-  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  letter-spacing: 0.3px;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, opacity 0.14s ease;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  user-select: none;
 }
 
 .btn:active {
@@ -164,15 +241,15 @@ html, body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  background: linear-gradient(135deg, #D4A84B, var(--gold-dark));
   color: var(--white);
-  box-shadow: 0 4px 16px rgba(184,134,11,0.35);
+  box-shadow: var(--shadow-gold);
 }
 
 .btn-secondary {
-  background: linear-gradient(135deg, var(--rose), #b05470);
+  background: linear-gradient(135deg, var(--rose), #a55c72);
   color: var(--white);
-  box-shadow: 0 4px 16px rgba(200,116,138,0.35);
+  box-shadow: 0 4px 16px rgba(196,120,138,0.30);
 }
 
 .btn-outline {
@@ -183,8 +260,8 @@ html, body {
 
 .btn-ghost {
   background: transparent;
-  color: var(--gray);
-  font-weight: normal;
+  color: var(--mid);
+  font-weight: 400;
   font-size: 0.95rem;
 }
 
@@ -193,45 +270,13 @@ html, body {
 }
 
 .btn-icon {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
+  line-height: 1;
 }
 
-/* ---- SCREEN HEADER ---- */
-.screen-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: var(--white);
-  border-bottom: 1px solid rgba(184,134,11,0.2);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  min-height: var(--header-h);
-}
-
-.screen-header h3 {
-  font-size: 1.1rem;
-  color: var(--gold);
-  flex: 1;
-  text-align: center;
-  padding-right: 40px; /* balance back button */
-}
-
-.btn-back {
-  background: none;
-  border: none;
-  color: var(--gold);
-  font-size: 1rem;
-  cursor: pointer;
-  font-family: inherit;
-  padding: 6px 8px;
-  border-radius: 8px;
-  white-space: nowrap;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* ---- CAMERA SCREEN ---- */
+/* =========================================================
+   SCREEN 2: CAMERA
+   ========================================================= */
 .camera-container {
   flex: 1;
   position: relative;
@@ -240,6 +285,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 0;
 }
 
 #video-preview {
@@ -248,98 +294,131 @@ html, body {
   object-fit: cover;
 }
 
-.camera-overlay {
+.camera-frame-overlay {
   position: absolute;
-  inset: 0;
-  border: 3px solid rgba(212,160,23,0.6);
+  inset: 16px;
+  border: 2px solid rgba(200,155,60,0.55);
+  border-radius: var(--radius);
   pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.25);
 }
 
 .camera-controls {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 32px 36px;
+  padding: 20px 36px 36px;
+  padding-bottom: max(36px, env(safe-area-inset-bottom));
   background: #111;
+  flex-shrink: 0;
 }
+
+.camera-spacer { width: 56px; }
 
 .btn-shutter {
-  width: 72px;
-  height: 72px;
+  width: 74px;
+  height: 74px;
   border-radius: 50%;
   background: var(--white);
-  border: 5px solid var(--gold-light);
+  border: 5px solid var(--gold);
   cursor: pointer;
-  box-shadow: 0 0 0 4px rgba(212,160,23,0.3);
+  box-shadow: 0 0 0 5px rgba(200,155,60,0.25), var(--shadow-gold);
   transition: transform 0.1s;
   -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
 }
 
-.btn-shutter:active {
-  transform: scale(0.9);
-}
+.btn-shutter:active { transform: scale(0.88); }
 
 .btn-flip {
-  background: rgba(255,255,255,0.15);
-  border: none;
+  width: 48px;
+  height: 48px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
   color: var(--white);
-  font-size: 1rem;
-  padding: 10px 14px;
-  border-radius: 10px;
+  font-size: 1.3rem;
+  border-radius: 50%;
   cursor: pointer;
-  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ---- EDIT SCREEN ---- */
-.preview-area {
+/* =========================================================
+   SCREEN 3: EDIT — KEY LAYOUT FIX
+   The screen does NOT scroll.
+   preview-wrap = fixed height, always visible at top.
+   controls-panel = scrolls independently below it.
+   ========================================================= */
+#screen-edit {
+  overflow: hidden;   /* Screen itself never scrolls */
+}
+
+.edit-body {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;      /* Critical for nested flex scroll to work */
+  overflow: hidden;
+}
+
+/* ---- Preview area ---- */
+.preview-wrap {
+  flex-shrink: 0;
+  background: #181818;
+  display: flex;
   align-items: center;
-  padding: 16px;
-  background: #1a1a1a;
-  min-height: 260px;
+  justify-content: center;
+  padding: 14px;
+  /* Height: ~42% of viewport height, min 180px, max 300px */
+  height: clamp(180px, 42vw, 300px);
 }
 
-.preview-area canvas {
-  max-width: 100%;
-  max-height: 340px;
-  border-radius: 8px;
-  box-shadow: var(--shadow);
+.preview-wrap canvas {
   display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
 }
 
-.preview-final {
-  min-height: 320px;
+/* ---- Controls panel: scrolls independently ---- */
+.controls-panel {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
 }
 
-.preview-final canvas {
-  max-height: 400px;
-}
-
+/* ---- Section labels ---- */
 .section-label {
-  font-size: 0.8rem;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.8px;
   color: var(--gold);
-  padding: 14px 16px 6px;
-  font-weight: bold;
+  padding: 16px 16px 6px;
 }
 
-/* ---- OPTIONS ROW ---- */
+/* ---- Options row (horizontally scrolling) ---- */
 .options-row {
   display: flex;
   gap: 10px;
-  padding: 6px 16px 16px;
+  padding: 4px 16px 14px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  overscroll-behavior-x: contain;
 }
 
-.options-row::-webkit-scrollbar {
-  display: none;
-}
+.options-row::-webkit-scrollbar { display: none; }
 
+/* ---- Option cards ---- */
 .option-card {
   display: flex;
   flex-direction: column;
@@ -348,130 +427,302 @@ html, body {
   cursor: pointer;
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
 }
 
-.option-card span {
-  font-size: 0.72rem;
-  color: var(--gray);
-  text-align: center;
-  max-width: 68px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.option-card:active {
+  background: var(--gold-pale);
 }
 
 .option-thumb {
-  width: 68px;
-  height: 68px;
+  width: 70px;
+  height: 70px;
   object-fit: cover;
-  border-radius: 10px;
-  border: 3px solid transparent;
-  transition: border-color 0.2s, transform 0.2s;
+  border-radius: var(--radius-sm);
+  border: 2.5px solid transparent;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  display: block;
+  background: var(--ivory-dark);
 }
 
+/* "None" placeholder thumb */
+.option-thumb-none {
+  width: 70px;
+  height: 70px;
+  border-radius: var(--radius-sm);
+  border: 2px dashed #ccc;
+  background: #f0ece8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #bbb;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.option-card span {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--light);
+  text-align: center;
+  max-width: 70px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s;
+}
+
+/* Selected state */
 .option-card.selected .option-thumb,
-.option-card.selected > div {
-  border-color: var(--gold-light) !important;
-  transform: scale(1.06);
+.option-card.selected .option-thumb-none {
+  border-color: var(--gold);
+  transform: scale(1.07);
+  box-shadow: 0 0 0 3px rgba(200,155,60,0.22);
 }
 
 .option-card.selected span {
-  color: var(--gold);
-  font-weight: bold;
+  color: var(--gold-dark);
+  font-weight: 600;
 }
 
-/* ---- TEXT INPUT ---- */
+/* ---- Text overlay input ---- */
 .text-input-row {
-  padding: 6px 16px 16px;
+  padding: 4px 16px 14px;
 }
 
 .text-input-row input {
   width: 100%;
-  border: 1.5px solid #ddd;
-  border-radius: 10px;
-  padding: 12px 14px;
-  font-size: 1rem;
-  font-family: inherit;
+  border: 1.5px solid var(--ivory-dark);
+  border-radius: var(--radius-sm);
+  padding: 13px 14px;
+  font-size: 0.95rem;
+  font-family: var(--font-body);
   background: var(--white);
   color: var(--dark);
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
 }
 
 .text-input-row input:focus {
-  border-color: var(--gold-light);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(200,155,60,0.12);
 }
 
-/* ---- ACTION BUTTONS ---- */
+.text-input-row input::placeholder {
+  color: var(--light);
+  font-style: italic;
+}
+
+/* ---- Action buttons (bottom of controls panel) ---- */
 .action-buttons {
-  padding: 12px 16px 32px;
+  padding: 12px 16px 8px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* ---- UPLOAD STATUS ---- */
+/* =========================================================
+   SCREEN 4: PREVIEW & UPLOAD
+   ========================================================= */
+#screen-preview {
+  overflow-y: auto;
+}
+
+.preview-final-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  background: #181818;
+  flex-shrink: 0;
+}
+
+.preview-final-wrap canvas {
+  display: block;
+  max-width: calc(100vw - 32px);
+  max-height: clamp(260px, 55vw, 480px);
+  width: auto;
+  height: auto;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.55);
+}
+
+.action-buttons--preview {
+  padding: 20px 20px 8px;
+  gap: 12px;
+}
+
+/* ---- Upload status message ---- */
 .upload-status {
   text-align: center;
   font-size: 0.95rem;
-  padding: 0 16px 20px;
-  min-height: 40px;
-  color: var(--gray);
+  line-height: 1.5;
+  padding: 0 20px 32px;
+  min-height: 48px;
+  color: var(--mid);
   font-style: italic;
 }
 
 .upload-status.success {
   color: #2e7d32;
-  font-weight: bold;
+  font-weight: 600;
   font-style: normal;
+  animation: fadeIn 0.4s ease;
 }
 
 .upload-status.error {
   color: #c62828;
-  font-weight: bold;
+  font-weight: 600;
   font-style: normal;
 }
 
-/* ---- SPINNER ---- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Spinner ---- */
 .spinner {
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(255,255,255,0.4);
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.35);
   border-top-color: var(--white);
   border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+  animation: spin 0.65s linear infinite;
+  vertical-align: middle;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-/* ---- DESKTOP tweaks ---- */
-@media (min-width: 480px) {
-  .welcome-content {
-    padding: 60px 40px 80px;
+/* =========================================================
+   RESPONSIVE BREAKPOINTS
+   ========================================================= */
+
+/* --- Small phones (landscape) --- */
+@media (max-height: 500px) and (orientation: landscape) {
+  .preview-wrap {
+    height: clamp(140px, 70vh, 200px);
   }
-  .title {
-    font-size: 3rem;
+  .controls-panel {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0;
+    overflow-x: hidden;
   }
-  .preview-area canvas {
-    max-height: 480px;
+  .controls-panel > * {
+    flex-shrink: 0;
+  }
+  .section-label {
+    padding-top: 10px;
+  }
+  .action-buttons {
+    min-width: 140px;
   }
 }
 
-@media (min-width: 768px) {
-  .screen {
-    max-width: 480px;
-    margin: 0 auto;
-    border-left: 1px solid #eee;
-    border-right: 1px solid #eee;
+/* --- Tablet & Desktop (≥ 680px wide) --- */
+@media (min-width: 680px) {
+  /* Center the app in a card on wider screens */
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--gold-pale), var(--rose-light));
   }
+
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background: linear-gradient(135deg, var(--gold-pale), var(--rose-light));
+    background: linear-gradient(135deg, var(--gold-pale) 0%, var(--rose-light) 100%);
     z-index: -1;
+  }
+
+  .screen {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateX(48px);
+    width: min(480px, 100vw);
+    height: min(820px, 100vh);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.22);
+    overflow: hidden;
+  }
+
+  .screen.active {
+    transform: translate(-50%, -50%) translateX(0);
+    opacity: 1;
+  }
+
+  .screen.slide-out {
+    transform: translate(-50%, -50%) translateX(-48px);
+    opacity: 0;
+  }
+
+  /* Larger preview on tablet */
+  .preview-wrap {
+    height: clamp(220px, 46vw, 340px);
+  }
+
+  .title { font-size: 3rem; }
+}
+
+/* --- Desktop edit screen: side-by-side layout (≥ 900px) --- */
+@media (min-width: 900px) {
+  .screen {
+    width: min(860px, 95vw);
+    height: min(780px, 96vh);
+  }
+
+  /* Edit screen becomes horizontal split */
+  #screen-edit .edit-body {
+    flex-direction: row;
+  }
+
+  .preview-wrap {
+    flex: 1;
+    height: auto;          /* Let flex determine height */
+    min-height: 300px;
+  }
+
+  .preview-wrap canvas {
+    max-height: 100%;
+    max-width: 100%;
+  }
+
+  .controls-panel {
+    width: 300px;
+    flex-shrink: 0;
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+  }
+
+  /* Preview screen: larger canvas */
+  .preview-final-wrap canvas {
+    max-height: clamp(320px, 55vw, 580px);
+  }
+
+  /* Welcome title */
+  .title { font-size: 3.2rem; }
+}
+
+/* --- Safe area support (notched phones) --- */
+@supports (padding: max(0px)) {
+  .camera-controls {
+    padding-bottom: max(36px, env(safe-area-inset-bottom));
+  }
+  .controls-panel {
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+  #screen-preview {
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
   }
 }

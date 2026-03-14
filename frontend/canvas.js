@@ -1,48 +1,40 @@
 /**
  * canvas.js — Photo composition engine
- * Combines: photo + background + frame + text overlay using HTML5 Canvas
+ * Combines: photo + background + frame + text using HTML5 Canvas.
+ * Uses BOOTH_CONFIG (config.js) to resolve asset paths.
  */
 
 const CanvasEngine = (() => {
-  const OUTPUT_W = 1080;
-  const OUTPUT_H = 1080;
+  const OUTPUT_SIZE = 1080; // Square output: 1080 × 1080 px
 
+  // Simple cache so each image loads only once per session
   const imageCache = {};
 
   function loadImage(src) {
+    if (!src) return Promise.resolve(null);
     if (imageCache[src]) return Promise.resolve(imageCache[src]);
-    return new Promise((resolve, reject) => {
+
+    return new Promise((resolve) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        imageCache[src] = img;
-        resolve(img);
-      };
-      img.onerror = () => {
-        // Resolve null so missing assets don't crash the app
-        console.warn('Could not load image:', src);
-        resolve(null);
-      };
+      img.onload  = () => { imageCache[src] = img; resolve(img); };
+      img.onerror = () => { console.warn('[Canvas] Could not load:', src); resolve(null); };
       img.src = src;
     });
   }
 
-  /**
-   * Draw the photo centered and cover-fitted into the canvas
-   */
-  function drawPhotoContain(ctx, photo, x, y, w, h) {
-    const scale = Math.max(w / photo.width, h / photo.height);
-    const sw = photo.width * scale;
-    const sh = photo.height * scale;
+  /** Cover-fit a source image into a target rectangle (like CSS object-fit: cover) */
+  function drawCover(ctx, img, x, y, w, h) {
+    const scale = Math.max(w / img.width, h / img.height);
+    const sw = img.width  * scale;
+    const sh = img.height * scale;
     const sx = x + (w - sw) / 2;
     const sy = y + (h - sh) / 2;
-    ctx.drawImage(photo, sx, sy, sw, sh);
+    ctx.drawImage(img, sx, sy, sw, sh);
   }
 
-  /**
-   * Clip to a rounded rectangle
-   */
-  function clipRoundRect(ctx, x, y, w, h, r) {
+  /** Clip context to a rounded rectangle */
+  function clipRounded(ctx, x, y, w, h, r) {
     ctx.beginPath();
     ctx.moveTo(x + r, y);
     ctx.lineTo(x + w - r, y);
@@ -57,166 +49,159 @@ const CanvasEngine = (() => {
     ctx.clip();
   }
 
-  /**
-   * Draw text overlay at the bottom of the canvas
-   */
-  function drawTextOverlay(ctx, text, canvasW, canvasH) {
-    if (!text || !text.trim()) return;
+  /** Resolve background asset path from BOOTH_CONFIG */
+  function bgPath(bgId) {
+    const item = BOOTH_CONFIG.backgrounds.find(b => b.id === bgId);
+    return item ? item.path : null;
+  }
 
-    const fontSize = Math.round(canvasW * 0.045);
-    ctx.save();
-
-    // Semi-transparent banner
-    const bannerH = fontSize * 2.4;
-    ctx.fillStyle = 'rgba(0,0,0,0.45)';
-    ctx.fillRect(0, canvasH - bannerH, canvasW, bannerH);
-
-    ctx.fillStyle = '#fff';
-    ctx.font = `italic bold ${fontSize}px Georgia, serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = 'rgba(0,0,0,0.6)';
-    ctx.shadowBlur = 6;
-    ctx.fillText(text, canvasW / 2, canvasH - bannerH / 2);
-
-    ctx.restore();
+  /** Resolve frame asset path from BOOTH_CONFIG */
+  function framePath(frameId) {
+    const item = BOOTH_CONFIG.frames.find(f => f.id === frameId);
+    return item ? item.path : null;
   }
 
   /**
-   * Draw wedding watermark
-   */
-  function drawWatermark(ctx, canvasW) {
-    ctx.save();
-    ctx.font = `${Math.round(canvasW * 0.025)}px Georgia, serif`;
-    ctx.fillStyle = 'rgba(255,255,255,0.7)';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'top';
-    ctx.fillText('Mailen & Javier 2025', canvasW - 16, 16);
-    ctx.restore();
-  }
-
-  /**
-   * Main compose function
-   * @param {HTMLCanvasElement} outputCanvas
+   * Main compose function.
+   * Draws: background → user photo (or polaroid) → frame overlay → text → watermark.
+   *
+   * @param {HTMLCanvasElement}           outputCanvas
    * @param {HTMLImageElement|HTMLCanvasElement} photoSource
-   * @param {string|null} bgKey  - 'floral' | 'romantic' | 'couple' | 'minimal' | 'none'
-   * @param {string|null} frameKey - 'polaroid' | 'floral-frame' | 'gold' | 'none'
-   * @param {string} overlayText
+   * @param {string} bgId        — id from BOOTH_CONFIG.backgrounds
+   * @param {string} frameId     — id from BOOTH_CONFIG.frames
+   * @param {string} overlayText — optional guest text
    */
-  async function compose(outputCanvas, photoSource, bgKey, frameKey, overlayText) {
-    const W = OUTPUT_W;
-    const H = OUTPUT_H;
-    outputCanvas.width = W;
+  async function compose(outputCanvas, photoSource, bgId, frameId, overlayText) {
+    const W = OUTPUT_SIZE;
+    const H = OUTPUT_SIZE;
+
+    outputCanvas.width  = W;
     outputCanvas.height = H;
 
     const ctx = outputCanvas.getContext('2d');
     ctx.clearRect(0, 0, W, H);
 
-    // 1. Draw background
-    if (bgKey && bgKey !== 'none') {
-      const bgImg = await loadImage(`assets/backgrounds/${bgKey}.jpg`);
-      if (bgImg) {
-        drawPhotoContain(ctx, bgImg, 0, 0, W, H);
-      } else {
-        ctx.fillStyle = '#f5f0ea';
-        ctx.fillRect(0, 0, W, H);
-      }
+    // 1. Background
+    const bg = await loadImage(bgPath(bgId));
+    if (bg) {
+      drawCover(ctx, bg, 0, 0, W, H);
     } else {
-      ctx.fillStyle = '#f5f0ea';
+      ctx.fillStyle = '#F5F0EA';
       ctx.fillRect(0, 0, W, H);
     }
 
-    // 2. Draw user photo based on frame type
-    if (frameKey === 'polaroid') {
+    // 2. User photo (special layout for polaroid frame)
+    if (frameId === 'polaroid') {
       await drawPolaroid(ctx, photoSource, W, H);
     } else {
-      // Default: photo with padding
-      const pad = frameKey && frameKey !== 'none' ? 80 : 0;
+      const pad = (frameId && frameId !== 'none') ? 72 : 0;
       ctx.save();
-      clipRoundRect(ctx, pad, pad, W - pad * 2, H - pad * 2, 16);
-      drawPhotoContain(ctx, photoSource, pad, pad, W - pad * 2, H - pad * 2);
+      clipRounded(ctx, pad, pad, W - pad * 2, H - pad * 2, 12);
+      drawCover(ctx, photoSource, pad, pad, W - pad * 2, H - pad * 2);
       ctx.restore();
     }
 
-    // 3. Draw frame overlay on top
-    if (frameKey && frameKey !== 'none') {
-      let frameSrc;
-      if (frameKey === 'polaroid') frameSrc = 'assets/frames/polaroid.png';
-      else if (frameKey === 'floral-frame') frameSrc = 'assets/frames/floral-frame.png';
-      else if (frameKey === 'gold') frameSrc = 'assets/frames/gold.png';
-
-      if (frameSrc) {
-        const frameImg = await loadImage(frameSrc);
-        if (frameImg) {
-          ctx.drawImage(frameImg, 0, 0, W, H);
-        }
-      }
+    // 3. Frame overlay (PNG with transparency, drawn on top)
+    const fp = framePath(frameId);
+    if (fp) {
+      const frameImg = await loadImage(fp);
+      if (frameImg) ctx.drawImage(frameImg, 0, 0, W, H);
     }
 
-    // 4. Draw text overlay
+    // 4. Text overlay
     drawTextOverlay(ctx, overlayText, W, H);
 
     // 5. Watermark
     drawWatermark(ctx, W);
   }
 
-  /**
-   * Special polaroid layout
-   */
+  /** Polaroid layout: white border + photo + names at bottom */
   async function drawPolaroid(ctx, photoSource, W, H) {
-    const pad = 60;
-    const bottomSpace = 180;
-    const photoX = pad;
-    const photoY = pad;
-    const photoW = W - pad * 2;
-    const photoH = H - pad - bottomSpace;
+    const pad    = 64;
+    const bottom = 190;
+    const pX = pad, pY = pad;
+    const pW = W - pad * 2;
+    const pH = H - pad - bottom;
 
-    // White polaroid background
-    ctx.fillStyle = '#fff';
-    ctx.shadowColor = 'rgba(0,0,0,0.25)';
-    ctx.shadowBlur = 30;
-    ctx.shadowOffsetY = 8;
-    ctx.fillRect(pad - 10, pad - 10, W - (pad - 10) * 2, H - (pad - 10) - bottomSpace + 180);
-    ctx.shadowColor = 'transparent';
-    ctx.shadowBlur = 0;
-
+    // White card with shadow
     ctx.save();
-    clipRoundRect(ctx, photoX, photoY, photoW, photoH, 4);
-    drawPhotoContain(ctx, photoSource, photoX, photoY, photoW, photoH);
+    ctx.shadowColor   = 'rgba(0,0,0,0.22)';
+    ctx.shadowBlur    = 28;
+    ctx.shadowOffsetY = 10;
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(pad - 12, pad - 12, W - (pad - 12) * 2, pH + bottom + 12);
     ctx.restore();
 
-    // Polaroid text area
+    // Photo
+    ctx.save();
+    clipRounded(ctx, pX, pY, pW, pH, 4);
+    drawCover(ctx, photoSource, pX, pY, pW, pH);
+    ctx.restore();
+
+    // White footer
     ctx.fillStyle = '#fff';
-    ctx.fillRect(pad - 10, photoY + photoH, W - (pad - 10) * 2, bottomSpace);
+    ctx.fillRect(pad - 12, pY + pH, W - (pad - 12) * 2, bottom + 12);
 
-    ctx.fillStyle = '#b8860b';
-    ctx.font = `italic bold ${Math.round(W * 0.055)}px Georgia, serif`;
-    ctx.textAlign = 'center';
+    // Names
+    ctx.fillStyle = '#C89B3C';
+    ctx.font = `italic bold ${Math.round(W * 0.052)}px 'Playfair Display', Georgia, serif`;
+    ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Mailen & Javier', W / 2, photoY + photoH + bottomSpace * 0.45);
+    ctx.fillText('Mailen & Javier', W / 2, pY + pH + bottom * 0.44);
 
-    ctx.fillStyle = '#888';
-    ctx.font = `${Math.round(W * 0.03)}px Georgia, serif`;
-    ctx.fillText('2025', W / 2, photoY + photoH + bottomSpace * 0.75);
+    // Year
+    ctx.fillStyle = '#aaa';
+    ctx.font = `${Math.round(W * 0.028)}px Georgia, serif`;
+    ctx.fillText('2025', W / 2, pY + pH + bottom * 0.76);
   }
 
-  /**
-   * Convert a canvas to a Blob (JPEG)
-   */
+  /** Semi-transparent banner + guest text at bottom of image */
+  function drawTextOverlay(ctx, text, W, H) {
+    if (!text || !text.trim()) return;
+
+    const fontSize = Math.round(W * 0.044);
+    const bannerH  = fontSize * 2.5;
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.42)';
+    ctx.fillRect(0, H - bannerH, W, bannerH);
+
+    ctx.fillStyle    = '#fff';
+    ctx.font         = `italic bold ${fontSize}px 'Playfair Display', Georgia, serif`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor  = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur   = 6;
+    ctx.fillText(text.trim(), W / 2, H - bannerH / 2);
+    ctx.restore();
+  }
+
+  /** Subtle watermark in top-right corner */
+  function drawWatermark(ctx, W) {
+    ctx.save();
+    ctx.font         = `${Math.round(W * 0.023)}px Georgia, serif`;
+    ctx.fillStyle    = 'rgba(255,255,255,0.65)';
+    ctx.textAlign    = 'right';
+    ctx.textBaseline = 'top';
+    ctx.shadowColor  = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur   = 3;
+    ctx.fillText('Mailen & Javier 2025', W - 18, 18);
+    ctx.restore();
+  }
+
+  /** Convert canvas to JPEG Blob */
   function canvasToBlob(canvas, quality = 0.88) {
     return new Promise((resolve) => {
       canvas.toBlob(resolve, 'image/jpeg', quality);
     });
   }
 
-  /**
-   * Download canvas as image
-   */
+  /** Trigger browser download of the composed photo */
   function downloadCanvas(canvas, filename = 'wedding-photo.jpg') {
-    const link = document.createElement('a');
-    link.download = filename;
-    link.href = canvas.toDataURL('image/jpeg', 0.88);
-    link.click();
+    const a = document.createElement('a');
+    a.download = filename;
+    a.href = canvas.toDataURL('image/jpeg', 0.88);
+    a.click();
   }
 
   return { compose, canvasToBlob, downloadCanvas };
